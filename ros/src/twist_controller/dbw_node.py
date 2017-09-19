@@ -86,13 +86,13 @@ class DBWNode(object):
 
     #Callback for /twist_cmd topic
     def twist_cmd_cb(self, twist):
+	rospy.logwarn("Twist command received %s", twist.twist.linear.x)
 	#TODO
 	pass
 
     #Callback for /vehicle/dbw_enabled topic
     def dbw_enabled_cb(self, status):
-	#TODO
-	#is_enabled = status.data
+	self.is_dbw_enabled = status.data
 	pass
 	
 
