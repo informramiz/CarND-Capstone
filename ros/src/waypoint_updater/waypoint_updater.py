@@ -5,6 +5,7 @@ from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
 
 import math
+import copy
 
 '''
 This node will publish waypoints from the car's current position to some `x` distance ahead.
@@ -32,21 +33,53 @@ class WaypointUpdater(object):
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
-
+	
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+	self.lane = None
+	self.car_pose = None
 
         rospy.spin()
 
     def pose_cb(self, msg):
-        # TODO: Implement
-        pass
+	self.car_pose = msg
+	x = self.car_pose.pose.position.x
+	y = self.car_pose.pose.position.y
+	rospy.logwarn("(x,y) of current vehicle position: (%s, %s)", x, y)
+
+	if self.lane == None:
+		return
+
+        self.publish_next_waypoints()
+
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement
-        pass
+	self.lane = waypoints
+      
+	x = self.lane.waypoints[0].pose.pose.position.x
+	#rospy.logwarn("x-coord of first waypoint position: %s", x)
+	waypoints_count = len(self.lane.waypoints)
+	#rospy.logwarn("wapoints_count: %s", waypoints_count)
+
+    def publish_next_waypoints(self):
+	index = self.find_next_closest_point_index()
+	rospy.logwarn("next closes point index: %s", index)
+
+	lane = Lane()
+	lane.header = self.lane.header
+	lane.waypoints = self.lane.waypoints[index:index+LOOKAHEAD_WPS]
+	rospy.logwarn("next 200 way points count: %s", len(lane.waypoints))
+
+	x = lane.waypoints[0].pose.pose.position.x
+	y = lane.waypoints[0].pose.pose.position.y
+	rospy.logwarn("next 200 waypoints' first point (x, y): (%s, %s)", x, y)
+	#publish data
+	self.final_waypoints_pub.publish(lane)
+	
+    def get_waypoint_position(self, waypoint):
+	return waypoint.pose.pose.position
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
@@ -62,6 +95,9 @@ class WaypointUpdater(object):
     def set_waypoint_velocity(self, waypoints, waypoint, velocity):
         waypoints[waypoint].twist.twist.linear.x = velocity
 
+    def euclidean_distance(self, a, b):
+	return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+
     def distance(self, waypoints, wp1, wp2):
         dist = 0
         dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
@@ -69,6 +105,25 @@ class WaypointUpdater(object):
             dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist
+
+    def find_next_closest_point_index(self):
+	index = -1
+	min_distance = 999999
+	car_position = self.car_pose.pose.position
+	for i in range(len(self.lane.waypoints)):
+		wp_position = self.lane.waypoints[i].pose.pose.position
+
+		#check if point is behind current vehicle position
+		if wp_position.y <= car_position.y:
+			continue;
+
+		distance = self.euclidean_distance(wp_position, car_position)
+		
+		if (distance < min_distance):
+			min_distance = distance
+			index = i
+
+	return index
 
 
 if __name__ == '__main__':
