@@ -47,7 +47,7 @@ class WaypointUpdater(object):
 	self.car_pose = msg
 	x = self.car_pose.pose.position.x
 	y = self.car_pose.pose.position.y
-	rospy.logwarn("(x,y) of current vehicle position: (%s, %s)", x, y)
+	#rospy.logwarn("(x,y) of current vehicle position: (%s, %s)", x, y)
 
 	if self.lane == None:
 		return
@@ -65,16 +65,17 @@ class WaypointUpdater(object):
 
     def publish_next_waypoints(self):
 	index = self.find_next_closest_point_index()
-	rospy.logwarn("next closes point index: %s", index)
+	#rospy.logwarn("next closes point index: %s", index)
 
 	lane = Lane()
 	lane.header = self.lane.header
 	lane.waypoints = self.lane.waypoints[index:index+LOOKAHEAD_WPS]
-	rospy.logwarn("next 200 way points count: %s", len(lane.waypoints))
+	#rospy.logwarn("next 200 way points count: %s", len(lane.waypoints))
 
 	x = lane.waypoints[0].pose.pose.position.x
 	y = lane.waypoints[0].pose.pose.position.y
-	rospy.logwarn("next 200 waypoints' first point (x, y): (%s, %s)", x, y)
+	#rospy.logwarn("next 200 waypoints' first point (x, y): (%s, %s)", x, y)
+
 	#publish data
 	self.final_waypoints_pub.publish(lane)
 	

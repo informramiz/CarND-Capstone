@@ -56,6 +56,11 @@ class DBWNode(object):
         # TODO: Create `TwistController` object
         # self.controller = TwistController(<Arguments you wish to provide>)
 
+	#other data members
+	self.is_dbw_enabled = True
+	self.twist_cmd = None
+	self.current_velocity = None
+
         # Subscribe to all the topics you need to
 	self.current_velocity_sub = rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
 
@@ -63,6 +68,7 @@ class DBWNode(object):
 	
 	self.vehicle_dbw_enabled = rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
 
+	#publish commands in a loop
         self.loop()
 
     def loop(self):
@@ -81,18 +87,19 @@ class DBWNode(object):
 
     #Callback for /current_velocity topic
     def current_velocity_cb(self, twist):
-	#TODO
+	self.current_velocity = twist
+	rospy.logwarn("Current velocity x: %s", self.current_velocity.twist.linear.x)
 	pass
 
     #Callback for /twist_cmd topic
     def twist_cmd_cb(self, twist):
-	rospy.logwarn("Twist command received %s", twist.twist.linear.x)
-	#TODO
-	pass
+	self.twist_cmd = twist
+	rospy.logwarn("Twist command received %s", self.twist_cmd.twist.linear.x)
 
     #Callback for /vehicle/dbw_enabled topic
     def dbw_enabled_cb(self, status):
 	self.is_dbw_enabled = status.data
+	rospy.logwarn("Is dbw enabled: %s", self.is_dbw_enabled)
 	pass
 	
 
