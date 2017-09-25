@@ -9,7 +9,6 @@ ONE_MPH = 0.44704
 
 class Controller(object):
     def __init__(self, wheel_base, steer_ratio, max_lat_accel,max_steer_angle):
-        # TODO: Implement
 	self.wheel_base = wheel_base
 	self.steer_ratio = steer_ratio
 	self.max_lat_accel = max_lat_accel
@@ -35,22 +34,11 @@ class Controller(object):
 	delta_t = (time_secs - self.prev_time_secs) / 1000000000.0
 	#rospy.logwarn("delta_t: %s", delta_t)
 	self.prev_time_secs = time_secs
-
-	#error = angular_velocity.z - current_angular_velocity.z
-	#p_val = self.pid_controller.step(error, 0.02)
-	#rospy.logwarn("p_val: %s", p_val)
-
-	#angular_velocity.z = p_val
-
 	
 	desired_steering_angle = self.get_steering_angle(linear_velocity, angular_velocity)
 	current_steering_angle = self.get_steering_angle(current_linear_velocity, current_angular_velocity)
 
 	steering_angle = self.yaw_controller.get_steering(linear_velocity.x, angular_velocity.z, current_linear_velocity.x)
-
-	#error = steering_angle - desired_steering_angle
-	#rospy.logwarn("angle, desired, error: %s, %s, %s", steering_angle, desired_steering_angle, error)
-	#p_val = self.pid_controller.step(error, 0.02)
 
 	error = current_steering_angle - self.prev_steering_angle
 	rospy.logwarn("current, prev, error: %s, %s, %s", current_steering_angle, self.prev_steering_angle, error)
