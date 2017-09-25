@@ -47,7 +47,8 @@ class WaypointUpdater(object):
 	self.car_pose = msg
 	x = self.car_pose.pose.position.x
 	y = self.car_pose.pose.position.y
-	#rospy.logwarn("(x,y) of current vehicle position: (%s, %s)", x, y)
+	rospy.logwarn("vehicle position (x, y): (%s, %s)", x, y)
+	rospy.logwarn("vehicle orientation (x, y, z, w): %s", self.car_pose.pose.orientation)
 
 	if self.lane == None:
 		return
@@ -74,7 +75,8 @@ class WaypointUpdater(object):
 
 	x = lane.waypoints[0].pose.pose.position.x
 	y = lane.waypoints[0].pose.pose.position.y
-	#rospy.logwarn("next 200 waypoints' first point (x, y): (%s, %s)", x, y)
+	rospy.logwarn("next 200 waypoints' first point (x, y): (%s, %s)", x, y)
+	rospy.logwarn("next 200 waypoints' first point orientation (x, y, z, w): %s", lane.waypoints[0].pose.pose.orientation)
 
 	#publish data
 	self.final_waypoints_pub.publish(lane)
@@ -97,7 +99,10 @@ class WaypointUpdater(object):
         waypoints[waypoint].twist.twist.linear.x = velocity
 
     def euclidean_distance(self, a, b):
-	return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+	return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2 + (a.z - b.z)**2)
+
+    def orientation_distance(self, a, b):
+	return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2 + (a.z - b.z)**2 + (a.w - b.w)**2)
 
     def distance(self, waypoints, wp1, wp2):
         dist = 0
@@ -110,18 +115,22 @@ class WaypointUpdater(object):
     def find_next_closest_point_index(self):
 	index = -1
 	min_distance = 999999
+	min_orientation_distance = 999999
 	car_position = self.car_pose.pose.position
+	car_orientation = self.car_pose.pose.orientation
+
 	for i in range(len(self.lane.waypoints)):
 		wp_position = self.lane.waypoints[i].pose.pose.position
-
+		wp_orientation = self.lane.waypoints[i].pose.pose.orientation
 		#check if point is behind current vehicle position
-		if wp_position.y <= car_position.y:
+		if wp_position.y < car_position.y:
 			continue;
 
 		distance = self.euclidean_distance(wp_position, car_position)
-		
-		if (distance < min_distance):
+		orientation_distance = self.orientation_distance(car_orientation, wp_orientation)
+		if (distance < min_distance and orientation_distance < min_orientation_distance):
 			min_distance = distance
+			min_orientation_distance = orientation_distance
 			index = i
 
 	return index
