@@ -72,9 +72,9 @@ class Controller(object):
 	Normalize angle between -1 and 1
     """
     def normalize_angle(self, angle):
-	if angle < -1:
-		return -1
-	elif angle > 1:
-		return 1
+	if angle < -0.436332:
+		return -0.436332
+	elif angle > 0.436332:
+		return 0.436332
 
 	return angle

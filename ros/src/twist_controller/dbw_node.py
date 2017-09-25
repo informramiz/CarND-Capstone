@@ -78,6 +78,7 @@ class DBWNode(object):
             # You should only publish the control commands if dbw is enabled
 		if (self.twist_cmd == None
 			or self.current_velocity == None):
+			rate.sleep()
 			continue
 
 		#rospy.logwarn("Current time: %s", self.twist_cmd.header.stamp.secs)
