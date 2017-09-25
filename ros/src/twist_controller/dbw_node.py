@@ -54,7 +54,7 @@ class DBWNode(object):
                                          BrakeCmd, queue_size=1)
 
         # Create a `Controller(<Arguments you wish to provide>)` object
-	self.controller = Controller()	
+	self.controller = Controller(wheel_base, steer_ratio, max_lat_accel, max_steer_angle)	
 
 	#other data members
 	self.is_dbw_enabled = True
@@ -80,8 +80,10 @@ class DBWNode(object):
 			or self.current_velocity == None):
 			continue
 
-		throttle, brake, steering = self.controller.control(self.twist_cmd.twist.linear, self.twist_cmd.twist.angular, self.current_velocity.twist.linear, self.is_dbw_enabled)
+		#rospy.logwarn("Current time: %s", self.twist_cmd.header.stamp.secs)
+		throttle, brake, steering = self.controller.control(self.twist_cmd.twist.linear, self.twist_cmd.twist.angular, self.current_velocity.twist.linear, self.current_velocity.twist.angular, self.is_dbw_enabled, self.twist_cmd.header.stamp.nsecs)
 
+		rospy.logwarn("Current velocity z: %s", self.current_velocity.twist.angular.z)
 		if self.is_dbw_enabled:
 			rospy.logwarn("Publishing throttle, brake, steer: %s, %s, %s", throttle, brake, steering)
 			self.publish(throttle, brake, steering)		
@@ -91,13 +93,12 @@ class DBWNode(object):
     #Callback for /current_velocity topic
     def current_velocity_cb(self, twist):
 	self.current_velocity = twist
-	rospy.logwarn("Current velocity x: %s", self.current_velocity.twist.linear.x)
-	pass
+	#rospy.logwarn("Current velocity x: %s", self.current_velocity.twist.linear.x)
 
     #Callback for /twist_cmd topic
     def twist_cmd_cb(self, twist):
 	self.twist_cmd = twist
-	rospy.logwarn("Twist command received %s", self.twist_cmd.twist.linear.x)
+	#rospy.logwarn("Twist command received %s", self.twist_cmd.twist.linear.x)
 
     #Callback for /vehicle/dbw_enabled topic
     def dbw_enabled_cb(self, status):

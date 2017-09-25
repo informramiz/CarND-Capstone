@@ -4,7 +4,7 @@ MAX_NUM = float('inf')
 
 
 class PID(object):
-    def __init__(self, kp, ki, kd, mn=MIN_NUM, mx=MAX_NUM):
+    def __init__(self, kp=20.0, ki=0.0000, kd=1.0, mn=-1, mx=1):
         self.kp = kp
         self.ki = ki
         self.kd = kd
