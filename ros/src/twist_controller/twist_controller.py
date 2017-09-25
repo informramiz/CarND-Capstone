@@ -46,8 +46,11 @@ class Controller(object):
 	
 	
 	self.prev_steering_angle = steering_angle
+
+	normalized_angle = self.normalize_angle(steering_angle - p_val)
+
 	# Return throttle, brake, steer
-        return 1., 0., steering_angle - p_val
+        return 1., 0., normalized_angle
 
 
 
@@ -64,3 +67,14 @@ class Controller(object):
 			steering_angle = 1
 
 		return steering_angle
+
+    """
+	Normalize angle between -1 and 1
+    """
+    def normalize_angle(self, angle):
+	if angle < -1:
+		return -1
+	elif angle > 1:
+		return 1
+
+	return angle
