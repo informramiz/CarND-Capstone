@@ -44,11 +44,16 @@ class Controller(object):
 
 	
 	desired_steering_angle = self.get_steering_angle(linear_velocity, angular_velocity)
+	current_steering_angle = self.get_steering_angle(current_linear_velocity, current_angular_velocity)
 
 	steering_angle = self.yaw_controller.get_steering(linear_velocity.x, angular_velocity.z, current_linear_velocity.x)
 
-	error = steering_angle - desired_steering_angle
-	rospy.logwarn("angle, desired, error: %s, %s, %s", steering_angle, desired_steering_angle, error)
+	#error = steering_angle - desired_steering_angle
+	#rospy.logwarn("angle, desired, error: %s, %s, %s", steering_angle, desired_steering_angle, error)
+	#p_val = self.pid_controller.step(error, 0.02)
+
+	error = current_steering_angle - self.prev_steering_angle
+	rospy.logwarn("current, prev, error: %s, %s, %s", current_steering_angle, self.prev_steering_angle, error)
 	p_val = self.pid_controller.step(error, 0.02)
 	
 	
@@ -56,6 +61,11 @@ class Controller(object):
 	# Return throttle, brake, steer
         return 1., 0., steering_angle - p_val
 
+
+
+    """
+	Calculates steering angle given linear and angular velocity
+    """
     def get_steering_angle(self, linear_velocity, angular_velocity):
 		radius = linear_velocity.x / angular_velocity.z if abs(angular_velocity.z) > 0. else 0.
 		steering_angle = self.yaw_controller.get_angle(radius) if abs(radius) > 0. else 0.
