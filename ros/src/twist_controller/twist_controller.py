@@ -32,6 +32,8 @@ class Controller(object):
 		return 1., 0., 0.
 	
 	delta_t = (time_secs - self.prev_time_secs) / 1000000000.0
+	if (delta_t == 0.0):
+		delta_t = 0.000001
 	#rospy.logwarn("delta_t: %s", delta_t)
 	self.prev_time_secs = time_secs
 	
@@ -41,8 +43,8 @@ class Controller(object):
 	steering_angle = self.yaw_controller.get_steering(linear_velocity.x, angular_velocity.z, current_linear_velocity.x)
 
 	error = current_steering_angle - self.prev_steering_angle
-	rospy.logwarn("current, prev, error: %s, %s, %s", current_steering_angle, self.prev_steering_angle, error)
-	p_val = self.pid_controller.step(error, 0.02)
+	#rospy.logwarn("current, prev, error: %s, %s, %s", current_steering_angle, self.prev_steering_angle, error)
+	p_val = self.pid_controller.step(error, delta_t)
 	
 	
 	self.prev_steering_angle = steering_angle

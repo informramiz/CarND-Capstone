@@ -84,9 +84,9 @@ class DBWNode(object):
 		#rospy.logwarn("Current time: %s", self.twist_cmd.header.stamp.secs)
 		throttle, brake, steering = self.controller.control(self.twist_cmd.twist.linear, self.twist_cmd.twist.angular, self.current_velocity.twist.linear, self.current_velocity.twist.angular, self.is_dbw_enabled, self.twist_cmd.header.stamp.nsecs)
 
-		rospy.logwarn("Current velocity z: %s", self.current_velocity.twist.angular.z)
+		#rospy.logwarn("Current velocity z: %s", self.current_velocity.twist.angular.z)
 		if self.is_dbw_enabled:
-			rospy.logwarn("Publishing throttle, brake, steer: %s, %s, %s", throttle, brake, steering)
+			#rospy.logwarn("Publishing throttle, brake, steer: %s, %s, %s", throttle, brake, steering)
 			self.publish(throttle, brake, steering)		
 		
             	rate.sleep()
