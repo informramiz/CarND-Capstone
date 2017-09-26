@@ -102,7 +102,10 @@ class WaypointUpdater(object):
 	return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2 + (a.z - b.z)**2)
 
     def orientation_distance(self, a, b):
-	return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2 + (a.z - b.z)**2 + (a.w - b.w)**2)
+	yaw_a = math.atan2(2.0*(a.y*a.z + a.w*a.x), a.w*a.w - a.x*a.x - a.y*a.y + a.z*a.z)
+	yaw_b = math.atan2(2.0*(b.y*b.z + b.w*b.x), b.w*b.w - b.x*b.x - b.y*b.y + b.z*b.z)
+	return math.sqrt((yaw_a-yaw_b)**2)
+	#return math.sqrt((a.z - b.z)**2 + (a.w - b.w)**2)
 
     def distance(self, waypoints, wp1, wp2):
         dist = 0
@@ -111,6 +114,8 @@ class WaypointUpdater(object):
             dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist
+
+
 
     def find_next_closest_point_index(self):
 	index = -1
@@ -122,13 +127,14 @@ class WaypointUpdater(object):
 	for i in range(len(self.lane.waypoints)):
 		wp_position = self.lane.waypoints[i].pose.pose.position
 		wp_orientation = self.lane.waypoints[i].pose.pose.orientation
+		
 		#check if point is behind current vehicle position
-		if wp_position.y < car_position.y:
-			continue;
+		#if wp_position.y < car_position.y:
+		#	continue;
 
 		distance = self.euclidean_distance(wp_position, car_position)
 		orientation_distance = self.orientation_distance(car_orientation, wp_orientation)
-		if (distance < min_distance and orientation_distance < min_orientation_distance):
+		if (distance < min_distance):
 			min_distance = distance
 			min_orientation_distance = orientation_distance
 			index = i
