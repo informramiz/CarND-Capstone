@@ -114,10 +114,6 @@ class WaypointUpdater(object):
 	for i in range(len(self.lane.waypoints)):
 		wp_position = self.lane.waypoints[i].pose.pose.position
 
-		#check if point is behind current vehicle position
-		if wp_position.y <= car_position.y:
-			continue;
-
 		distance = self.euclidean_distance(wp_position, car_position)
 		
 		if (distance < min_distance):
